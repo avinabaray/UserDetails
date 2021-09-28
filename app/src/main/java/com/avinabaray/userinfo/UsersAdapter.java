@@ -67,6 +67,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
 
     @Override
     public int getItemCount() {
+        onUserDataChangeListener.onSizeChange(users.size());
         return users.size();
     }
 
@@ -89,5 +90,7 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
         void onEdit(int pos);
 
         void onDelete(int pos);
+
+        void onSizeChange(int size);
     }
 }

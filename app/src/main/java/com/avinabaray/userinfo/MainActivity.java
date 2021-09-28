@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
     private AutoCompleteTextView profilesAutoText;
 
     private LinearLayout bottomSheet;
-    private View rootLayout;
+    private View rootLayout, errorLayout;
     private Activity mActivity;
     private ArrayList<UserModel> users;
 
@@ -108,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
         doneButton = findViewById(R.id.doneButton);
         cancelButton = findViewById(R.id.cancelButton);
         bottomSheet = findViewById(R.id.bottomSheet);
+        errorLayout = findViewById(R.id.errorLayout);
 
         addUserText = findViewById(R.id.addUserText);
         firstNameText = findViewById(R.id.firstNameText);
@@ -143,8 +144,13 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDelete(int pos) {
                 users.remove(pos);
-                usersAdapter.notifyDataSetChanged();
+                updateAdapter();
                 updateSharedPref();
+            }
+
+            @Override
+            public void onSizeChange(int size) {
+
             }
         });
 
@@ -156,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                 addUser(false, -1, null);
             }
         });
-
+        updateAdapter();
     }
 
     private void initBottomSheet() {
@@ -226,7 +232,7 @@ public class MainActivity extends AppCompatActivity {
                 if (fName.length() > 0 && lName.length() > 0) {
                     UserModel um = new UserModel(fName, lName, profile, username, password, email);
                     users.set(pos, um);
-                    usersAdapter.notifyDataSetChanged();
+                    updateAdapter();
                     updateSharedPref();
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 } else {
@@ -247,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
                 if (fName.length() > 0 && lName.length() > 0) {
                     UserModel um = new UserModel(fName, lName, profile, username, password, email);
                     users.add(um);
-                    usersAdapter.notifyDataSetChanged();
+                    updateAdapter();
                     updateSharedPref();
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 } else {
@@ -258,6 +264,17 @@ public class MainActivity extends AppCompatActivity {
         }
         bottomSheetBehavior.setState(BottomSheetBehavior.STATE_EXPANDED);
 
+    }
+
+    private void updateAdapter() {
+        usersAdapter.notifyDataSetChanged();
+        if (users.size() <= 0) {
+            errorLayout.setVisibility(View.VISIBLE);
+            usersRecycler.setVisibility(View.GONE);
+        } else {
+            errorLayout.setVisibility(View.GONE);
+            usersRecycler.setVisibility(View.VISIBLE);
+        }
     }
 
     private void updateSharedPref() {
@@ -303,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
 
                 users.addAll(new Gson().fromJson(jsonStringFromFile, new TypeToken<ArrayList<UserModel>>() {
                 }.getType()));
-                usersAdapter.notifyDataSetChanged();
+                updateAdapter();
                 updateSharedPref();
 
             } catch (IOException e) {
