@@ -3,16 +3,27 @@ package com.avinabaray.userinfo;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.ContentResolver;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.FileUtils;
+import android.provider.OpenableColumns;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
@@ -21,16 +32,29 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.google.gson.stream.JsonReader;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final int PICKFILE_REQUEST_CODE = 124;
     private RecyclerView usersRecycler;
-    private ExtendedFloatingActionButton addUserFab;
+    private ExtendedFloatingActionButton addUserFab, importFab;
     private MaterialButton cancelButton, doneButton;
 
     private TextInputLayout firstNameText, lastNameText, emailText, profilesText, usernameText, passwordText;
+    private TextView addUserText;
     private AutoCompleteTextView profilesAutoText;
 
     private LinearLayout bottomSheet;
@@ -39,60 +63,34 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<UserModel> users;
 
     private BottomSheetBehavior bottomSheetBehavior;
-
-    private String jsonString = "[\n" +
-            "  {\n" +
-            "    \"firstName\": \"Avinaba\",\n" +
-            "    \"lastName\": \"Ray\",\n" +
-            "    \"profiles\": \"Software Engineer\"\n" +
-            "  },\n" +
-            "  {\n" +
-            "    \"firstName\": \"Arindam\",\n" +
-            "    \"lastName\": \"Ray\",\n" +
-            "    \"profiles\": \"Software Engineer\"\n" +
-            "  },\n" +
-            "  {\n" +
-            "    \"firstName\": \"Rahul\",\n" +
-            "    \"lastName\": \"Sharma\",\n" +
-            "    \"profiles\": \"Analyst\"\n" +
-            "  },\n" +
-            "  {\n" +
-            "    \"firstName\": \"Priya\",\n" +
-            "    \"lastName\": \"Singh\",\n" +
-            "    \"profiles\": \"UI/UX Designer\"\n" +
-            "  },\n" +
-            "  {\n" +
-            "    \"firstName\": \"Rohit\",\n" +
-            "    \"lastName\": \"Das\",\n" +
-            "    \"profiles\": \"Software Engineer\"\n" +
-            "  },\n" +
-            "  {\n" +
-            "    \"firstName\": \"Avishek\",\n" +
-            "    \"lastName\": \"Roy\",\n" +
-            "    \"profiles\": \"Analyst\"\n" +
-            "  }\n" +
-            "]";
     private UsersAdapter usersAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+
         mActivity = this;
         users = new ArrayList<>();
         setContentView(R.layout.activity_main);
 
         initViews();
         initBottomSheet();
-
         initListFromSharedPref();
-
-//        users = new Gson().fromJson(
-//                jsonString,
-//                new TypeToken<ArrayList<UserModel>>() {
-//                }.getType()
-//        );
-
         initRecycler();
+
+        importFab.setOnClickListener(v -> {
+            AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(mActivity);
+            alertDialogBuilder.setTitle("Import from JSON File")
+                    .setMessage("Select a JSON File to import user data")
+                    .setCancelable(true)
+                    .setIcon(R.drawable.ic_import_file)
+                    .setPositiveButton("OK", (dialog, which) -> initImportFromJSON())
+                    .setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+
+            AlertDialog alertDialog = alertDialogBuilder.create();
+            alertDialog.show();
+        });
     }
 
     private void initListFromSharedPref() {
@@ -106,10 +104,12 @@ public class MainActivity extends AppCompatActivity {
         rootLayout = findViewById(R.id.rootLayout);
         usersRecycler = findViewById(R.id.usersRecycler);
         addUserFab = findViewById(R.id.addUserFab);
+        importFab = findViewById(R.id.importFab);
         doneButton = findViewById(R.id.doneButton);
         cancelButton = findViewById(R.id.cancelButton);
         bottomSheet = findViewById(R.id.bottomSheet);
 
+        addUserText = findViewById(R.id.addUserText);
         firstNameText = findViewById(R.id.firstNameText);
         lastNameText = findViewById(R.id.lastNameText);
         emailText = findViewById(R.id.emailText);
@@ -119,6 +119,14 @@ public class MainActivity extends AppCompatActivity {
         passwordText = findViewById(R.id.passwordText);
 
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet);
+    }
+
+    private void initImportFromJSON() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("application/json");
+        mActivity.startActivityForResult(Intent.createChooser(intent, "Import from JSON File"), PICKFILE_REQUEST_CODE);
+//        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE_REQUEST);
+
     }
 
     private void initRecycler() {
@@ -192,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void addUser(boolean editMode, int pos, @Nullable UserModel oldUser) {
         if (editMode) {
+            addUserText.setText("Edit User");
             if (oldUser == null) {
                 throw new IllegalStateException("oldUser object can't be null in editMode");
             }
@@ -207,8 +216,8 @@ public class MainActivity extends AppCompatActivity {
             passwordText.getEditText().setText(oldUser.getPassword());
 
             doneButton.setOnClickListener(v -> {
-                String fName = firstNameText.getEditText().getText().toString();
-                String lName = lastNameText.getEditText().getText().toString();
+                String fName = normalizeString(firstNameText.getEditText().getText().toString());
+                String lName = normalizeString(lastNameText.getEditText().getText().toString());
                 String email = emailText.getEditText().getText().toString();
                 String profile = profilesText.getEditText().getText().toString();
                 String username = usernameText.getEditText().getText().toString();
@@ -226,9 +235,10 @@ public class MainActivity extends AppCompatActivity {
 
             });
         } else {
+            addUserText.setText("Add New User");
             doneButton.setOnClickListener(v -> {
-                String fName = firstNameText.getEditText().getText().toString();
-                String lName = lastNameText.getEditText().getText().toString();
+                String fName = normalizeString(firstNameText.getEditText().getText().toString());
+                String lName = normalizeString(lastNameText.getEditText().getText().toString());
                 String email = emailText.getEditText().getText().toString();
                 String profile = profilesText.getEditText().getText().toString();
                 String username = usernameText.getEditText().getText().toString();
@@ -274,5 +284,31 @@ public class MainActivity extends AppCompatActivity {
                 ch[i] = (char) (ch[i] + 'a' - 'A');
         }
         return new String(ch);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICKFILE_REQUEST_CODE && resultCode == RESULT_OK && data != null && data.getData() != null) {
+            try {
+                InputStream is = mActivity.getContentResolver().openInputStream(data.getData());
+                StringBuilder sb = new StringBuilder();
+                for (int ch; (ch = is.read()) != -1; ) {
+                    sb.append((char) ch);
+                }
+                String jsonStringFromFile = sb.toString();
+
+//                Log.e("File", sw);
+
+                users.addAll(new Gson().fromJson(jsonStringFromFile, new TypeToken<ArrayList<UserModel>>() {
+                }.getType()));
+                usersAdapter.notifyDataSetChanged();
+                updateSharedPref();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

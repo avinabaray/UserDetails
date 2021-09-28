@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.amulyakhare.textdrawable.TextDrawable;
+import com.amulyakhare.textdrawable.util.ColorGenerator;
 
 import java.util.ArrayList;
 
@@ -42,9 +43,10 @@ public class UsersAdapter extends RecyclerView.Adapter<UsersAdapter.ViewHolder> 
         UserModel currUser = users.get(position);
 
         holder.nameText.setText(currUser.getFirstName() + " " + currUser.getLastName());
-        holder.userImage.setImageDrawable(
-                TextDrawable.builder()
-                        .buildRound(currUser.getFirstName().substring(0, 1), Color.RED)
+        holder.userImage.setImageDrawable(TextDrawable
+                .builder()
+                .buildRound(currUser.getFirstName().substring(0, 1),
+                        ColorGenerator.DEFAULT.getRandomColor())
         );
 
         holder.deleteImage.setOnClickListener(new View.OnClickListener() {

@@ -56,8 +56,7 @@
     <color name="colorItemSelected">#531AB6</color>
     <color name="colorItemDeselected">#F1B043</color>
     <color name="lineView2">#8B8B8B</color>
-
-
+    <color name="transparent">#00000000</color>
 
 
 </resources>

@@ -15,15 +15,33 @@
             android:id="@+id/text1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="All Users"
+            android:background="@drawable/vas_type_bg"
+            android:fontFamily="sans-serif"
+            app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintLeft_toLeftOf="parent"
             app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:paddingLeft="20dp"
+            android:paddingTop="3dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="8dp"
+            android:text="User Details"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold" />
+
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/usersRecycler"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginTop="8dp"
+            android:paddingLeft="4dp"
+            android:paddingRight="4dp"
+            android:paddingBottom="150dp"
+            android:clipToPadding="false"
+            android:clipChildren="false"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/text1"
             app:layout_constraintVertical_bias="0"
@@ -31,13 +49,28 @@
             />
 
         <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/importFab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:textAlignment="center"
+            android:tooltipText="Import from JSON File"
+            app:backgroundTint="@color/pinkAccent"
+            app:icon="@drawable/ic_import_file"
+            app:iconTint="@color/white"
+            app:layout_constraintBottom_toTopOf="@id/addUserFab"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
             android:id="@+id/addUserFab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="16dp"
-            android:text="Add User"
             android:textAlignment="center"
+            android:tooltipText="Add New User"
+            app:backgroundTint="@color/pinkAccent"
             app:icon="@drawable/ic_add_user_white"
+            app:iconTint="@color/white"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintRight_toRightOf="parent" />
 
