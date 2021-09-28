@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">User Info</string>
+
+    <string-array name="profiles">
+        <item>Software Engineer</item>
+        <item>UI/UX Designer</item>
+        <item>Analyst</item>
+        <item>Customer Support</item>
+    </string-array>
 </resources>
