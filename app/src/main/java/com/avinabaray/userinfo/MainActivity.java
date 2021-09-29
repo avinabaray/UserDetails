@@ -5,7 +5,9 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
@@ -23,6 +25,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputLayout;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -81,8 +84,13 @@ public class MainActivity extends AppCompatActivity {
     private void initListFromSharedPref() {
         SharedPreferences pref = mActivity.getApplicationContext().getSharedPreferences("user_info", MODE_PRIVATE);
         String jsonData = pref.getString("json_data", "[]");
-        users.addAll(new Gson().fromJson(jsonData, new TypeToken<ArrayList<UserModel>>() {
-        }.getType()));
+        try {
+            users.addAll(new Gson().fromJson(jsonData, new TypeToken<ArrayList<UserModel>>() {
+            }.getType()));
+        } catch (Exception e) {
+            Log.e("ERROR", "JSON is not formatted correctly in Shared Preference");
+            Toast.makeText(mActivity, "Oops... Something went wrong", Toast.LENGTH_SHORT).show();
+        }
     }
 
     private void initViews() {
@@ -304,8 +312,16 @@ public class MainActivity extends AppCompatActivity {
 
 //                Log.e("File", sw);
 
-                users.addAll(new Gson().fromJson(jsonStringFromFile, new TypeToken<ArrayList<UserModel>>() {
-                }.getType()));
+                try {
+                    ArrayList<UserModel> tempList =
+                            new Gson().fromJson(jsonStringFromFile, new TypeToken<ArrayList<UserModel>>() {
+                            }.getType());
+
+                    users.addAll(tempList);
+                } catch (Exception e) {
+                    makeSnack(rootLayout, "JSON is not formatted correctly");
+//                    Toast.makeText(mActivity, "JSON is not formatted correctly", Toast.LENGTH_SHORT).show();
+                }
                 updateAdapter();
                 updateSharedPref();
 
@@ -313,5 +329,18 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    private void makeSnack(View rootLayout, String msg) {
+        final Snackbar snackbar = Snackbar
+                .make(rootLayout, msg, Snackbar.LENGTH_LONG);
+        snackbar.show();
+        snackbar.setAction("Dismiss", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                snackbar.dismiss();
+            }
+        });
+//                .setActionTextColor(Color.parseColor("#FFFFFF"));
     }
 }

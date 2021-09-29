@@ -24,8 +24,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="50dp"
-                android:background="@drawable/grad_bg"
                 android:layout_marginBottom="0dp"
+                android:background="@drawable/grad_bg"
                 android:gravity="center"
                 android:orientation="horizontal">
 
@@ -76,7 +76,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="text"
-                        android:maxLines="1" />
+                        android:maxLines="1"
+                        android:nextFocusDown="@id/a1" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
@@ -90,6 +91,7 @@
                     android:hint="Last Name">
 
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/a1"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:inputType="text"
@@ -179,7 +181,8 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp">
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/cancelButton"
