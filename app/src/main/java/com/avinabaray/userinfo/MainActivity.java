@@ -230,7 +230,8 @@ public class MainActivity extends AppCompatActivity {
                     updateSharedPref();
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 } else {
-                    Toast.makeText(mActivity, "Fill up your name correctly", Toast.LENGTH_SHORT).show();
+                    makeSnack(rootLayout, "Fill up your name correctly");
+//                    Toast.makeText(mActivity, "Fill up your name correctly", Toast.LENGTH_SHORT).show();
                 }
 
             });
@@ -251,7 +252,8 @@ public class MainActivity extends AppCompatActivity {
                     updateSharedPref();
                     bottomSheetBehavior.setState(BottomSheetBehavior.STATE_COLLAPSED);
                 } else {
-                    Toast.makeText(mActivity, "Fill up your name correctly", Toast.LENGTH_SHORT).show();
+                    makeSnack(rootLayout, "Fill up your name correctly");
+//                    Toast.makeText(mActivity, "Fill up your name correctly", Toast.LENGTH_SHORT).show();
                 }
 
             });
